@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AntiAntiXray implements ClientModInitializer {
-    public static KeyBind rvn            = new KeyBind(Config.kcScan);
+    public static KeyBind rvn             = new KeyBind(Config.kcScan);
     public static KeyBind removeBlockBeta = new KeyBind(Config.kcRemove);
+    public static KeyBind chunkKey        = new KeyBind(Config.kcChunk);
     public static List<RefreshingJob> jobs = new ArrayList<>();
 
     public static void revealNewBlocks(int rad, long delayInMS) {
@@ -23,18 +24,28 @@ public class AntiAntiXray implements ClientModInitializer {
         jobs.add(rfj);
     }
 
+    public static void revealChunk(long delayInMS) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.world == null) return;
+        // 16 x 16 columns x world height blocks
+        double todo = 16.0 * 16.0 * mc.world.getHeight();
+        ProgressBar pbar = new ProgressBar(todo);
+        mc.getToastManager().add(pbar);
+        RefreshingJob rfj = new RefreshingJob(new ChunkRunner(delayInMS, pbar), pbar);
+        jobs.add(rfj);
+    }
+
     @Override
     public void onInitializeClient() {
         Logger.info("Loading and initializing AAX...");
 
-        // Intercept chat commands (replaces 1.16 sendChatMessage mixin)
         ClientSendMessageEvents.ALLOW_CHAT.register(msg -> {
             if (msg.toLowerCase().startsWith(":")) {
                 String[] args = msg.substring(1).trim().split(" +");
                 String cmd = args[0].toLowerCase();
                 Base cmd2r = Config.cmdmanager.getByName(cmd);
                 if (cmd2r != null) cmd2r.run(args);
-                return false; // cancel the actual send
+                return false;
             }
             if (msg.toLowerCase().startsWith("@aax")) {
                 MinecraftClient mc = MinecraftClient.getInstance();
