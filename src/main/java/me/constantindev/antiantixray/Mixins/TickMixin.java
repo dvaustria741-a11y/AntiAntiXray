@@ -28,25 +28,30 @@ public class TickMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo ci) {
-        // Clean up finished jobs
         List<RefreshingJob> nl = new ArrayList<>();
         AntiAntiXray.jobs.forEach(j -> { if (!j.progress.done) nl.add(j); });
         AntiAntiXray.jobs = nl;
 
         MinecraftClient mc = MinecraftClient.getInstance();
 
-        // Scan keybind (default G)
+        // Scan keybind (default G) — Mode 1 radius scan
         if (AntiAntiXray.rvn.checkPressed()) {
             if (mc.player != null)
                 mc.player.sendMessage(Text.literal("Refreshing blocks..."), true);
             AntiAntiXray.revealNewBlocks(Config.rad, Config.delay);
         }
 
-        // Chunk scan keybind (default B)
+        // Chunk keybind (default M) — Mode 1 or Mode 2 depending on :mode2 toggle
         if (AntiAntiXray.chunkKey.checkPressed()) {
-            if (mc.player != null)
-                mc.player.sendMessage(Text.literal("Scanning current chunk..."), true);
-            AntiAntiXray.revealChunk(Config.delay);
+            if (mc.player != null) {
+                String modeLabel = Config.mode2 ? "Mode 2" : "Mode 1";
+                mc.player.sendMessage(Text.literal("Scanning current chunk (" + modeLabel + ")..."), true);
+            }
+            if (Config.mode2) {
+                AntiAntiXray.revealChunkMode2(Config.delay);
+            } else {
+                AntiAntiXray.revealChunk(Config.delay);
+            }
         }
 
         // Remove-block keybind
