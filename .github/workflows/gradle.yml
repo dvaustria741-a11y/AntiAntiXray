@@ -24,4 +24,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AntiAntiXray
-        path: build/libs/*-1.9.jar
+        path: build/libs/AntiAntixray-*.jar
+        if-no-files-found: error
