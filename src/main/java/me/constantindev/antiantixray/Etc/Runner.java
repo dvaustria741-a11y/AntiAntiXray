@@ -23,11 +23,12 @@ public class Runner implements Runnable {
     @SuppressWarnings("BusyWait")
     @Override
     public void run() {
-        ClientPlayNetworkHandler conn = MinecraftClient.getInstance().getNetworkHandler();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ClientPlayNetworkHandler conn = mc.getNetworkHandler();
         if (conn == null) return;
-        if (MinecraftClient.getInstance().player == null) return;
+        if (mc.player == null) return;
 
-        BlockPos pos        = MinecraftClient.getInstance().player.getBlockPos();
+        BlockPos pos        = mc.player.getBlockPos();
         Block[]  checkblocks = Config.checkblocks;
 
         for (int cx = -rad; cx <= rad; cx++) {
@@ -37,10 +38,9 @@ public class Runner implements Runnable {
                     pbar.progress++;
 
                     BlockPos currblock = new BlockPos(pos.getX()+cx, pos.getY()+cy, pos.getZ()+cz);
-                    if (MinecraftClient.getInstance().player == null) return;
+                    if (mc.player == null || mc.world == null) return;
 
-                    Block block = MinecraftClient.getInstance().player
-                            .getWorld().getBlockState(currblock).getBlock();
+                    Block block = mc.world.getBlockState(currblock).getBlock();
 
                     boolean good = Config.scanAll;
                     for (Block cb : checkblocks) {
