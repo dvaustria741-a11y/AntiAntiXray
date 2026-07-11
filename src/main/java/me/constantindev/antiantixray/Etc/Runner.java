@@ -15,9 +15,9 @@ public class Runner implements Runnable {
     ProgressBar pbar;
 
     public Runner(int rad, long delay, ProgressBar pbar) {
-        this.rad = rad;
+        this.rad   = rad;
         this.delay = delay;
-        this.pbar = pbar;
+        this.pbar  = pbar;
     }
 
     @SuppressWarnings("BusyWait")
@@ -25,52 +25,33 @@ public class Runner implements Runnable {
     public void run() {
         ClientPlayNetworkHandler conn = MinecraftClient.getInstance().getNetworkHandler();
         if (conn == null) return;
-        assert MinecraftClient.getInstance().player != null;
-        BlockPos pos = MinecraftClient.getInstance().player.getBlockPos();
+        if (MinecraftClient.getInstance().player == null) return;
 
-
-        // Blocks that aren't ores but still needs to be checked
-        Block[] checkblocks = Config.checkblocks;
+        BlockPos pos        = MinecraftClient.getInstance().player.getBlockPos();
+        Block[]  checkblocks = Config.checkblocks;
 
         for (int cx = -rad; cx <= rad; cx++) {
             for (int cy = -rad; cy <= rad; cy++) {
                 for (int cz = -rad; cz <= rad; cz++) {
-                    if (!isRunning) break;
+                    if (!isRunning) return;
                     pbar.progress++;
-                    BlockPos currblock = new BlockPos(pos.getX() + cx, pos.getY() + cy, pos.getZ() + cz);
 
-                    Block block = MinecraftClient.getInstance().player.world.getBlockState(currblock).getBlock();
+                    BlockPos currblock = new BlockPos(pos.getX()+cx, pos.getY()+cy, pos.getZ()+cz);
+                    if (MinecraftClient.getInstance().player == null) return;
 
-                    boolean good = Config.scanAll; // cool for else man
+                    Block block = MinecraftClient.getInstance().player
+                            .getWorld().getBlockState(currblock).getBlock();
 
-                    // only check if block is a ore or in checkblocks (obsidian for example)
-                    for (Block checkblock : checkblocks) {
-                        if (block.equals(checkblock)) {
-                            //Logger.info(block.toString() + " Is in checkbloks or a ore");
-                            good = true;
-                            break;
-                        }
+                    boolean good = Config.scanAll;
+                    for (Block cb : checkblocks) {
+                        if (block.equals(cb)) { good = true; break; }
                     }
+                    if (!good) continue;
 
-                    if (!good) {
-                        continue;
-                    }
-
-
-                    //Logger.info("Checking " + block.toString() + " at " + currblock.toShortString());
-
-
-                    PlayerActionC2SPacket packet = new PlayerActionC2SPacket(
+                    conn.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                            currblock,
-                            Direction.UP
-                    );
-                    conn.sendPacket(packet);
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException e) {
-                        //e.printStackTrace();
-                    }
+                            currblock, Direction.UP));
+                    try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
                 }
             }
         }
