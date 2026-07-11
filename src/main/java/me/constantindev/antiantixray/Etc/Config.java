@@ -12,6 +12,7 @@ public class Config {
     public static Manager cmdmanager = new Manager();
     public static boolean scanAll = false;
     public static boolean auto = false;
+    public static boolean mode2 = false;
     public static int movethreshhold = 5;
     public static Block[] checkblocks = {Blocks.OBSIDIAN, Blocks.CLAY, Blocks.MOSSY_COBBLESTONE,
             Blocks.DIAMOND_ORE, Blocks.REDSTONE_ORE, Blocks.IRON_ORE, Blocks.COAL_ORE, Blocks.LAPIS_ORE,
