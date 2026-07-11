@@ -1,7 +1,6 @@
 package me.constantindev.antiantixray.Mixins;
 
 import me.constantindev.antiantixray.AntiAntiXray;
-import me.constantindev.antiantixray.Commands.Base;
 import me.constantindev.antiantixray.Etc.Config;
 import me.constantindev.antiantixray.Etc.Logger;
 import me.constantindev.antiantixray.Etc.RefreshingJob;
@@ -24,82 +23,61 @@ import java.util.List;
 @Mixin(ClientPlayerEntity.class)
 public class TickMixin {
 
-    public BlockPos old;
-    public int movedblocks;
+    private BlockPos old;
+    private int movedblocks;
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo ci) {
+        // Clean up finished jobs
         List<RefreshingJob> nl = new ArrayList<>();
-        AntiAntiXray.jobs.forEach(refreshingJob -> {
-            if (!refreshingJob.progress.done) {
-                nl.add(refreshingJob);
-            }
-        });
+        AntiAntiXray.jobs.forEach(j -> { if (!j.progress.done) nl.add(j); });
         AntiAntiXray.jobs = nl;
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+
+        // Scan keybind
         if (AntiAntiXray.rvn.checkPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.sendMessage(Text.of("Refreshing blocks..."), true);
+            if (mc.player != null)
+                mc.player.sendMessage(Text.literal("Refreshing blocks..."), true);
             AntiAntiXray.revealNewBlocks(Config.rad, Config.delay);
         }
+
+        // Remove-block keybind
         if (AntiAntiXray.removeBlockBeta.checkPressed()) {
-            /*
-             * */
-            for (int cx = -3; cx <= 3; cx++) {
-                for (int cy = -3; cy <= 3; cy++) {
-                    for (int cz = -3; cz <= 3; cz++) {
-                        assert MinecraftClient.getInstance().crosshairTarget != null;
-                        BlockPos b2r = ((BlockHitResult) MinecraftClient.getInstance().crosshairTarget).getBlockPos();
-
-                        assert MinecraftClient.getInstance().player != null;
-                        //BlockState a = MinecraftClient.getInstance().player.world.getBlockState(b2r.add(cx,cy,cz));
-
-                        Block s = Block.getBlockFromItem(MinecraftClient.getInstance().player.inventory.getMainHandStack().getItem());
-                        BlockState b = Blocks.AIR.getDefaultState();
-                        if (s != null) b = s.getDefaultState();
-
-                        MinecraftClient.getInstance().player.world.setBlockState(b2r.add(cx, cy, cz), b);
-                        //MinecraftClient.getInstance().player.world.removeBlock(b2r.add(cx, cy, cz), false);
+            if (mc.crosshairTarget instanceof BlockHitResult bhr && mc.player != null) {
+                BlockPos b2r = bhr.getBlockPos();
+                for (int cx = -3; cx <= 3; cx++) {
+                    for (int cy = -3; cy <= 3; cy++) {
+                        for (int cz = -3; cz <= 3; cz++) {
+                            // Use the held item's block, or air
+                            Block s = Block.getBlockFromItem(
+                                mc.player.getInventory().getMainHandStack().getItem());
+                            BlockState b = (s != null) ? s.getDefaultState() : Blocks.AIR.getDefaultState();
+                            mc.player.getWorld().setBlockState(b2r.add(cx, cy, cz), b);
+                        }
                     }
                 }
             }
         }
 
+        // Auto-scan on movement
         if (Config.auto) {
             try {
-                assert MinecraftClient.getInstance().player != null;
-                BlockPos pos = MinecraftClient.getInstance().player.getBlockPos();
-
-                if (pos != old) {
-                    movedblocks++;
-
-                    if (movedblocks > Config.movethreshhold && AntiAntiXray.jobs.size() == 0) {
-                        AntiAntiXray.revealNewBlocks(Config.rad, Config.delay);
-                        Logger.info("Scanning new pos: " + pos.toShortString());
-                        movedblocks = 0;
+                if (mc.player != null) {
+                    BlockPos pos = mc.player.getBlockPos();
+                    if (!pos.equals(old)) {
+                        movedblocks++;
+                        if (movedblocks > Config.movethreshhold && AntiAntiXray.jobs.isEmpty()) {
+                            AntiAntiXray.revealNewBlocks(Config.rad, Config.delay);
+                            Logger.info("Scanning new pos: " + pos.toShortString());
+                            movedblocks = 0;
+                        }
                     }
+                    old = pos;
                 }
-                old = pos;
-
             } catch (NullPointerException e) {
                 Logger.info("Null Error");
             }
-        }
-    }
-
-
-    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
-    public void sendChatMessage(String msg, CallbackInfo ci) {
-        if (msg.toLowerCase().startsWith(":")) {
-            ci.cancel();
-            String[] args = msg.substring(1).trim().split(" +");
-            String cmd = args[0].toLowerCase();
-            Base cmd2r = Config.cmdmanager.getByName(cmd);
-            cmd2r.run(args);
-        }
-        if (msg.toLowerCase().startsWith("@aax")) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.sendMessage(Text.of("New prefix is :"), false);
-            ci.cancel();
         }
     }
 }
