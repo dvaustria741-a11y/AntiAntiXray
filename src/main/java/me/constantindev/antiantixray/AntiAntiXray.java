@@ -1,15 +1,18 @@
 package me.constantindev.antiantixray;
 
+import me.constantindev.antiantixray.Commands.Base;
 import me.constantindev.antiantixray.Etc.*;
 import me.constantindev.antiantixray.GUI.ProgressBar;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AntiAntiXray implements ClientModInitializer {
-    public static KeyBind rvn = new KeyBind(Config.kcScan);
+    public static KeyBind rvn            = new KeyBind(Config.kcScan);
     public static KeyBind removeBlockBeta = new KeyBind(Config.kcRemove);
     public static List<RefreshingJob> jobs = new ArrayList<>();
 
@@ -24,5 +27,22 @@ public class AntiAntiXray implements ClientModInitializer {
     public void onInitializeClient() {
         Logger.info("Loading and initializing AAX...");
 
+        // Intercept chat commands (replaces 1.16 sendChatMessage mixin)
+        ClientSendMessageEvents.ALLOW_CHAT.register(msg -> {
+            if (msg.toLowerCase().startsWith(":")) {
+                String[] args = msg.substring(1).trim().split(" +");
+                String cmd = args[0].toLowerCase();
+                Base cmd2r = Config.cmdmanager.getByName(cmd);
+                if (cmd2r != null) cmd2r.run(args);
+                return false; // cancel the actual send
+            }
+            if (msg.toLowerCase().startsWith("@aax")) {
+                MinecraftClient mc = MinecraftClient.getInstance();
+                if (mc.player != null)
+                    mc.player.sendMessage(Text.literal("New prefix is :"), false);
+                return false;
+            }
+            return true;
+        });
     }
 }
