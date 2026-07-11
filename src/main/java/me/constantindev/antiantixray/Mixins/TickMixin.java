@@ -44,16 +44,15 @@ public class TickMixin {
 
         // Remove-block keybind
         if (AntiAntiXray.removeBlockBeta.checkPressed()) {
-            if (mc.crosshairTarget instanceof BlockHitResult bhr && mc.player != null) {
+            if (mc.crosshairTarget instanceof BlockHitResult bhr && mc.player != null && mc.world != null) {
                 BlockPos b2r = bhr.getBlockPos();
                 for (int cx = -3; cx <= 3; cx++) {
                     for (int cy = -3; cy <= 3; cy++) {
                         for (int cz = -3; cz <= 3; cz++) {
-                            // Use the held item's block, or air
                             Block s = Block.getBlockFromItem(
-                                mc.player.getInventory().getMainHandStack().getItem());
+                                mc.player.getInventory().getSelectedStack().getItem());
                             BlockState b = (s != null) ? s.getDefaultState() : Blocks.AIR.getDefaultState();
-                            mc.player.getWorld().setBlockState(b2r.add(cx, cy, cz), b);
+                            mc.world.setBlockState(b2r.add(cx, cy, cz), b);
                         }
                     }
                 }
