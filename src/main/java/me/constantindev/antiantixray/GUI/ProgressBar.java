@@ -2,10 +2,9 @@ package me.constantindev.antiantixray.GUI;
 
 import me.constantindev.antiantixray.Etc.Config;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.text.Text;
 
 public class ProgressBar implements Toast {
 
@@ -19,7 +18,7 @@ public class ProgressBar implements Toast {
     }
 
     @Override
-    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+    public Visibility draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         // Dark background
         context.fill(0, 0, getWidth(), getHeight(), 0xCC1A1A2E);
         context.fill(1, 1, getWidth()-1, getHeight()-1, 0xFF252545);
@@ -32,10 +31,9 @@ public class ProgressBar implements Toast {
         context.fill(3, getHeight()-5, 3+barW, getHeight()-2, 0xFF4CAF50);
 
         // Text
-        MinecraftClient mc = MinecraftClient.getInstance();
-        int tx = getWidth()  / 2 - mc.textRenderer.getWidth(line) / 2;
-        int ty = getHeight() / 2 - mc.textRenderer.fontHeight / 2 - 2;
-        context.drawText(mc.textRenderer, Text.literal(line), tx, ty, 0xFFFFFF, true);
+        int tx = getWidth()  / 2 - textRenderer.getWidth(line) / 2;
+        int ty = getHeight() / 2 - textRenderer.fontHeight / 2 - 2;
+        context.drawText(textRenderer, net.minecraft.text.Text.literal(line), tx, ty, 0xFFFFFF, true);
 
         return done ? Visibility.HIDE : Visibility.SHOW;
     }
