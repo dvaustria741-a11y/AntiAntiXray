@@ -30,7 +30,8 @@ public class AntiAntiXray implements ClientModInitializer {
         double todo = 16.0 * 16.0 * mc.world.getHeight();
         ProgressBar pbar = new ProgressBar(todo);
         mc.getToastManager().add(pbar);
-        RefreshingJob rfj = new RefreshingJob(new ChunkRunner(delayInMS, pbar), pbar);
+        // Always use 1ms for chunk scan — large column needs to be fast
+        RefreshingJob rfj = new RefreshingJob(new ChunkRunner(1L, pbar), pbar);
         jobs.add(rfj);
     }
 
@@ -40,7 +41,8 @@ public class AntiAntiXray implements ClientModInitializer {
         double todo = 16.0 * 16.0 * mc.world.getHeight();
         ProgressBar pbar = new ProgressBar(todo);
         mc.getToastManager().add(pbar);
-        RefreshingJob rfj = new RefreshingJob(new Mode2ChunkRunner(delayInMS, pbar), pbar);
+        // Always use 1ms for chunk scan
+        RefreshingJob rfj = new RefreshingJob(new Mode2ChunkRunner(1L, pbar), pbar);
         jobs.add(rfj);
     }
 
