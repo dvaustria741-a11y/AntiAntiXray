@@ -1,18 +1,17 @@
 package me.constantindev.antiantixray.GUI;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.constantindev.antiantixray.Etc.Config;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 
-@SuppressWarnings("deprecation")
 public class ProgressBar implements Toast {
 
-    public boolean done = false;
-    public int progress = 1;
-    public double todo = Math.pow(Config.rad * 2 + 1, 3);
+    public boolean done     = false;
+    public int     progress = 1;
+    public double  todo     = Math.pow(Config.rad * 2 + 1, 3);
 
     private static double round(double value) {
         int scale = (int) Math.pow(10, 2);
@@ -20,13 +19,27 @@ public class ProgressBar implements Toast {
     }
 
     @Override
-    public Visibility draw(MatrixStack matrices, ToastManager manager, long startTime) {
-        manager.getGame().getTextureManager().bindTexture(TEXTURE);
-        RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-        manager.drawTexture(matrices, 0, 0, 0, 0, this.getWidth(), this.getHeight());
-        int width = this.getWidth() / 2 - (manager.getGame().textRenderer.getWidth("Refreshing blocks, " + round((progress / todo) * 100) + "%") / 2);
-        int height = this.getHeight() / 2 - manager.getGame().textRenderer.fontHeight / 2;
-        MinecraftClient.getInstance().textRenderer.draw(matrices, "Refreshing blocks, " + round((progress / todo) * 100) + "%", width, height, 0xFFFFFF);
+    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+        // Dark background
+        context.fill(0, 0, getWidth(), getHeight(), 0xCC1A1A2E);
+        context.fill(1, 1, getWidth()-1, getHeight()-1, 0xFF252545);
+
+        String pct  = round((progress / todo) * 100) + "%";
+        String line = "AAX Scan: " + pct;
+
+        // Progress bar fill
+        int barW = (int)((progress / todo) * (getWidth() - 6));
+        context.fill(3, getHeight()-5, 3+barW, getHeight()-2, 0xFF4CAF50);
+
+        // Text
+        MinecraftClient mc = MinecraftClient.getInstance();
+        int tx = getWidth()  / 2 - mc.textRenderer.getWidth(line) / 2;
+        int ty = getHeight() / 2 - mc.textRenderer.fontHeight / 2 - 2;
+        context.drawText(mc.textRenderer, Text.literal(line), tx, ty, 0xFFFFFF, true);
+
         return done ? Visibility.HIDE : Visibility.SHOW;
     }
+
+    @Override public int getWidth()  { return 200; }
+    @Override public int getHeight() { return 32;  }
 }
