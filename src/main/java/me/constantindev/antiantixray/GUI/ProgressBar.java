@@ -20,25 +20,27 @@ public class ProgressBar implements Toast {
 
     @Override
     public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
-        // Dark background
         context.fill(0, 0, getWidth(), getHeight(), 0xCC1A1A2E);
         context.fill(1, 1, getWidth()-1, getHeight()-1, 0xFF252545);
 
         String pct  = round((progress / todo) * 100) + "%";
         String line = "AAX Scan: " + pct;
 
-        // Progress bar fill
         int barW = (int)((progress / todo) * (getWidth() - 6));
         context.fill(3, getHeight()-5, 3+barW, getHeight()-2, 0xFF4CAF50);
 
-        // Text
         int tx = getWidth()  / 2 - textRenderer.getWidth(line) / 2;
         int ty = getHeight() / 2 - textRenderer.fontHeight / 2 - 2;
         context.drawText(textRenderer, Text.literal(line), tx, ty, 0xFFFFFF, true);
     }
 
     @Override
-    public Visibility update(ToastManager manager, long startTime) {
+    public void update(ToastManager manager, long startTime) {
+        // state is read via getVisibility()
+    }
+
+    @Override
+    public Visibility getVisibility() {
         return done ? Visibility.HIDE : Visibility.SHOW;
     }
 
