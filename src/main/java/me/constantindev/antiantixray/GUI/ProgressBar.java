@@ -1,7 +1,6 @@
 package me.constantindev.antiantixray.GUI;
 
 import me.constantindev.antiantixray.Etc.Config;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
@@ -36,11 +35,11 @@ public class ProgressBar implements Toast {
         int tx = getWidth()  / 2 - textRenderer.getWidth(line) / 2;
         int ty = getHeight() / 2 - textRenderer.fontHeight / 2 - 2;
         context.drawText(textRenderer, Text.literal(line), tx, ty, 0xFFFFFF, true);
+    }
 
-        // Dismiss when scan is complete
-        if (done) {
-            MinecraftClient.getInstance().getToastManager().clear();
-        }
+    @Override
+    public Visibility update(ToastManager manager, long startTime) {
+        return done ? Visibility.HIDE : Visibility.SHOW;
     }
 
     @Override public int getWidth()  { return 200; }
