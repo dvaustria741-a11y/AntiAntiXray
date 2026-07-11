@@ -11,7 +11,15 @@ public class ProgressBar implements Toast {
 
     public boolean done     = false;
     public int     progress = 1;
-    public double  todo     = Math.pow(Config.rad * 2 + 1, 3);
+    public double  todo;
+
+    public ProgressBar() {
+        this.todo = Math.pow(Config.rad * 2 + 1, 3);
+    }
+
+    public ProgressBar(double customTodo) {
+        this.todo = customTodo;
+    }
 
     private static double round(double value) {
         int scale = (int) Math.pow(10, 2);
@@ -35,9 +43,7 @@ public class ProgressBar implements Toast {
     }
 
     @Override
-    public void update(ToastManager manager, long startTime) {
-        // state is read via getVisibility()
-    }
+    public void update(ToastManager manager, long startTime) {}
 
     @Override
     public Visibility getVisibility() {
