@@ -27,11 +27,20 @@ public class AntiAntiXray implements ClientModInitializer {
     public static void revealChunk(long delayInMS) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.world == null) return;
-        // 16 x 16 columns x world height blocks
         double todo = 16.0 * 16.0 * mc.world.getHeight();
         ProgressBar pbar = new ProgressBar(todo);
         mc.getToastManager().add(pbar);
         RefreshingJob rfj = new RefreshingJob(new ChunkRunner(delayInMS, pbar), pbar);
+        jobs.add(rfj);
+    }
+
+    public static void revealChunkMode2(long delayInMS) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.world == null) return;
+        double todo = 16.0 * 16.0 * mc.world.getHeight();
+        ProgressBar pbar = new ProgressBar(todo);
+        mc.getToastManager().add(pbar);
+        RefreshingJob rfj = new RefreshingJob(new Mode2ChunkRunner(delayInMS, pbar), pbar);
         jobs.add(rfj);
     }
 
