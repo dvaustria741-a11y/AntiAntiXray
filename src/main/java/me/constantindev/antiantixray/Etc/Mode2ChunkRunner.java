@@ -8,11 +8,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 /**
- * Mode 2 chunk scanner — same ABORT_DESTROY_BLOCK packet that works on this server,
- * but queries EVERY block in the chunk column (not just known ores) so fake ores
- * get replaced by the real block the server sends back.
+ * Mode 2 chunk scanner — queries EVERY block (not just known ores)
+ * from world bottom to Y=20, so fake ores get replaced by real server data.
+ * Uses Config.delay to stay under server packet rate limits.
  */
 public class Mode2ChunkRunner extends Runner {
+
+    private static final int MAX_ORE_Y = 20;
 
     public Mode2ChunkRunner(long delay, ProgressBar pbar) {
         super(0, delay, pbar);
@@ -29,7 +31,7 @@ public class Mode2ChunkRunner extends Runner {
         int chunkX = (playerPos.getX() >> 4) << 4;
         int chunkZ = (playerPos.getZ() >> 4) << 4;
         int minY   = mc.world.getBottomY();
-        int maxY   = mc.world.getBottomY() + mc.world.getHeight();
+        int maxY   = Math.min(MAX_ORE_Y, mc.world.getBottomY() + mc.world.getHeight());
 
         for (int x = chunkX; x < chunkX + 16; x++) {
             for (int z = chunkZ; z < chunkZ + 16; z++) {
@@ -41,7 +43,7 @@ public class Mode2ChunkRunner extends Runner {
                     conn.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
                             new BlockPos(x, y, z), Direction.UP));
-                    try { Thread.sleep(1L); } catch (InterruptedException ignored) {}
+                    try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
                 }
             }
         }
