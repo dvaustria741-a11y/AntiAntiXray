@@ -1,24 +1,23 @@
 {
   "schemaVersion": 1,
   "id": "antiantixray",
-  "version": "1.0.0",
+  "version": "${version}",
   "environment": "client",
-  "authors": [
-    "ConstantinDev"
-  ],
-  "entrypoints": {
-    "client": [
-      "me.constantindev.antiantixray.AntiAntiXray"
-    ]
-  },
   "name": "AntiAntiXray",
   "description": "Defeats Anti Xray",
+  "authors": [ "ConstantinDev" ],
   "contact": {
     "email": "constantin.chris10@gmail.com",
     "homepage": "https://constantindev.github.io"
   },
-  "license": "GPL 2.0",
-  "mixins": [
-    "antiantixray.mixins.json"
-  ]
+  "license": "GPL-2.0-only",
+  "entrypoints": {
+    "client": [ "me.constantindev.antiantixray.AntiAntiXray" ]
+  },
+  "mixins": [ "antiantixray.mixins.json" ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.11"
+  }
 }
