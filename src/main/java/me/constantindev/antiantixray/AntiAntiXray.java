@@ -27,22 +27,23 @@ public class AntiAntiXray implements ClientModInitializer {
     public static void revealChunk(long delayInMS) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.world == null) return;
-        double todo = 16.0 * 16.0 * mc.world.getHeight();
+        // todo = 16x16 x ore Y range (bottomY to 20)
+        int oreHeight = Math.min(20, mc.world.getBottomY() + mc.world.getHeight()) - mc.world.getBottomY();
+        double todo = 16.0 * 16.0 * oreHeight;
         ProgressBar pbar = new ProgressBar(todo);
         mc.getToastManager().add(pbar);
-        // Always use 1ms for chunk scan — large column needs to be fast
-        RefreshingJob rfj = new RefreshingJob(new ChunkRunner(1L, pbar), pbar);
+        RefreshingJob rfj = new RefreshingJob(new ChunkRunner(delayInMS, pbar), pbar);
         jobs.add(rfj);
     }
 
     public static void revealChunkMode2(long delayInMS) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.world == null) return;
-        double todo = 16.0 * 16.0 * mc.world.getHeight();
+        int oreHeight = Math.min(20, mc.world.getBottomY() + mc.world.getHeight()) - mc.world.getBottomY();
+        double todo = 16.0 * 16.0 * oreHeight;
         ProgressBar pbar = new ProgressBar(todo);
         mc.getToastManager().add(pbar);
-        // Always use 1ms for chunk scan
-        RefreshingJob rfj = new RefreshingJob(new Mode2ChunkRunner(1L, pbar), pbar);
+        RefreshingJob rfj = new RefreshingJob(new Mode2ChunkRunner(delayInMS, pbar), pbar);
         jobs.add(rfj);
     }
 
