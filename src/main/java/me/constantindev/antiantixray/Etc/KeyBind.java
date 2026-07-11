@@ -17,7 +17,7 @@ public class KeyBind {
 
     public boolean checkPressed() {
         if (MinecraftClient.getInstance().currentScreen != null) return false;
-        boolean flag2 = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), kc);
+        boolean flag2 = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), kc);
         if (!flag2) {
             flag3 = false;
             return false;
