@@ -5,6 +5,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
+import net.minecraft.client.toast.ToastManager;
+import net.minecraft.text.Text;
 
 public class ProgressBar implements Toast {
 
@@ -18,7 +20,7 @@ public class ProgressBar implements Toast {
     }
 
     @Override
-    public Visibility draw(DrawContext context, TextRenderer textRenderer, long startTime) {
+    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         // Dark background
         context.fill(0, 0, getWidth(), getHeight(), 0xCC1A1A2E);
         context.fill(1, 1, getWidth()-1, getHeight()-1, 0xFF252545);
@@ -33,9 +35,12 @@ public class ProgressBar implements Toast {
         // Text
         int tx = getWidth()  / 2 - textRenderer.getWidth(line) / 2;
         int ty = getHeight() / 2 - textRenderer.fontHeight / 2 - 2;
-        context.drawText(textRenderer, net.minecraft.text.Text.literal(line), tx, ty, 0xFFFFFF, true);
+        context.drawText(textRenderer, Text.literal(line), tx, ty, 0xFFFFFF, true);
 
-        return done ? Visibility.HIDE : Visibility.SHOW;
+        // Dismiss when scan is complete
+        if (done) {
+            MinecraftClient.getInstance().getToastManager().clear();
+        }
     }
 
     @Override public int getWidth()  { return 200; }
