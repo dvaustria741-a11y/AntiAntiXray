@@ -35,11 +35,18 @@ public class TickMixin {
 
         MinecraftClient mc = MinecraftClient.getInstance();
 
-        // Scan keybind
+        // Scan keybind (default G)
         if (AntiAntiXray.rvn.checkPressed()) {
             if (mc.player != null)
                 mc.player.sendMessage(Text.literal("Refreshing blocks..."), true);
             AntiAntiXray.revealNewBlocks(Config.rad, Config.delay);
+        }
+
+        // Chunk scan keybind (default B)
+        if (AntiAntiXray.chunkKey.checkPressed()) {
+            if (mc.player != null)
+                mc.player.sendMessage(Text.literal("Scanning current chunk..."), true);
+            AntiAntiXray.revealChunk(Config.delay);
         }
 
         // Remove-block keybind
