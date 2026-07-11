@@ -8,7 +8,17 @@ import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
+/**
+ * Scans the chunk column from world bottom up to Y=20 (all ore levels).
+ * Skips Y=20 to world top — no diamonds/deepslate ores spawn there.
+ * Uses Config.delay (same as G scan) to avoid packet-flood kicks.
+ */
 public class ChunkRunner extends Runner {
+
+    // Highest Y where ores (including ancient debris) can still spawn.
+    // Diamonds: y=-64 to y=16. Ancient debris: y=8 to y=119 (Nether only).
+    // Overworld cap of 20 covers everything safely.
+    private static final int MAX_ORE_Y = 20;
 
     public ChunkRunner(long delay, ProgressBar pbar) {
         super(0, delay, pbar);
@@ -25,7 +35,7 @@ public class ChunkRunner extends Runner {
         int chunkX = (playerPos.getX() >> 4) << 4;
         int chunkZ = (playerPos.getZ() >> 4) << 4;
         int minY   = mc.world.getBottomY();
-        int maxY   = mc.world.getBottomY() + mc.world.getHeight();
+        int maxY   = Math.min(MAX_ORE_Y, mc.world.getBottomY() + mc.world.getHeight());
 
         Block[] checkblocks = Config.checkblocks;
 
@@ -48,8 +58,7 @@ public class ChunkRunner extends Runner {
                     conn.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
                             pos, Direction.UP));
-                    // 1ms minimum delay to avoid flooding the server
-                    try { Thread.sleep(1L); } catch (InterruptedException ignored) {}
+                    try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
                 }
             }
         }
