@@ -31,7 +31,7 @@ public class ChunkRunner extends Runner {
         int chunkX = (playerPos.getX() >> 4) << 4;
         int chunkZ = (playerPos.getZ() >> 4) << 4;
         int minY   = mc.world.getBottomY();
-        int maxY   = mc.world.getTopY(); // exclusive upper bound
+        int maxY   = mc.world.getBottomY() + mc.world.getHeight(); // exclusive upper bound
 
         Block[] checkblocks = Config.checkblocks;
 
